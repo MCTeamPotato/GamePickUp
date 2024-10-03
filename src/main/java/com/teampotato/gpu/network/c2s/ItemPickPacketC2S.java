@@ -31,7 +31,6 @@ public record ItemPickPacketC2S() {
             if (entityHitResult.getEntity() instanceof ItemEntity itemEntity) {
                 serverPlayer.addItem(itemEntity.getItem());
                 itemEntity.discard();
-                GamePickUp.LOGGER.info(itemEntity.getItem().getDescriptionId());
             }
         });
         ctx.get().setPacketHandled(true);

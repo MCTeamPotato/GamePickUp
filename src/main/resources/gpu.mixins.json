@@ -8,6 +8,7 @@
     "ItemEntityMixin"
   ],
   "client": [
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1
