@@ -1,5 +1,6 @@
 package com.teampotato.gpu.mixin;
 
+import com.teampotato.gpu.client.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -25,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
     @Shadow @Nullable public MultiPlayerGameMode gameMode;
 
     @Shadow private int rightClickDelay;
@@ -40,6 +41,8 @@ public class MinecraftMixin {
 
     @Shadow @Final public GameRenderer gameRenderer;
 
+    @Shadow protected abstract void startUseItem();
+
     @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V", ordinal = 0))
     private void useItemClick(Minecraft instance){
         useItemOn();
@@ -48,6 +51,13 @@ public class MinecraftMixin {
     @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V", ordinal = 1))
     private void useItemKeyHold(Minecraft instance){
         useItemOn();
+    }
+
+    @Inject(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 14), cancellable = true)
+    private void interaction(CallbackInfo ci){
+        while(KeyBindings.PICK.get().consumeClick()) {
+            this.startUseItem();
+        }
     }
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 1), cancellable = true)
