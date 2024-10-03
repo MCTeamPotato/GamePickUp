@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.teampotato.gpu.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "game_pick_up.refmap.json",
+  "mixins": [
+    "ItemEntityMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
