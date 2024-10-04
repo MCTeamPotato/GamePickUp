@@ -10,12 +10,16 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class HitResultUtil {
-    public static EntityHitResult hitItemEntity(Player player, double range){
-        HitResult hitResult = getHitResult(player.level(), player, range);
+    public static EntityHitResult hitItemEntity(Player player){
+        HitResult hitResult = getHitResult(player.level(), player);
         if (hitResult instanceof EntityHitResult entityHitResult) {
             return entityHitResult;
         }
         return null;
+    }
+
+    public static HitResult getHitResult(Level level, Player player){
+        return getHitResult(level, player, 3);
     }
 
     public static HitResult getHitResult(Level level, Player player, double range) {
@@ -28,13 +32,13 @@ public class HitResultUtil {
                 eyePosition,
                 endPosition,
                 new AABB(eyePosition, endPosition)
-                        .expandTowards(viewVector.scale(range))
-                        .inflate(-0.5),
+                        .expandTowards(viewVector.scale(range)),
                 entity -> !entity.isSpectator(),
                 0.0f
         );
         if (hitResult == null) {
-            hitResult = level.clip(new ClipContext(
+
+                hitResult = level.clip(new ClipContext(
                     eyePosition,
                     endPosition,
                     ClipContext.Block.OUTLINE,
