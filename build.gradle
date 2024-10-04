@@ -208,3 +208,13 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
+
+afterEvaluate {
+    configurations.runtimeClasspath.forEach { file ->
+        if (file.name.startsWith("sponge-mixin")) {
+            tasks.named("runClient", JavaExec) {
+                jvmArgs("-javaagent:${file.absolutePath}")
+            }
+        }
+    }
+}

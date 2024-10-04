@@ -1,14 +1,10 @@
 package com.teampotato.gpu.Util;
 
-import com.teampotato.gpu.client.KeyBindings;
-import com.teampotato.gpu.network.NetworkHandler;
-import com.teampotato.gpu.network.c2s.ItemPickPacketC2S;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -23,15 +19,19 @@ public class HitResultUtil {
     }
 
     public static HitResult getHitResult(Level level, Player player, double range) {
-        Vec3 eyePosition = player.getEyePosition();
-        Vec3 viewVector = player.getViewVector(1.0f);
-        Vec3 endPosition = eyePosition.add(viewVector.x * range, viewVector.y * range, viewVector.z * range);
+        Vec3 eyePosition = player.getEyePosition();  // 获取玩家的眼睛位置
+        Vec3 viewVector = player.getViewVector(1.0f); // 下一帧向量
+        Vec3 endPosition = eyePosition.add(viewVector.scale(range));
+
         HitResult hitResult = ProjectileUtil.getEntityHitResult(level,
                 player,
                 eyePosition,
                 endPosition,
-                player.getBoundingBox().expandTowards(viewVector.scale(range)).inflate(1.0, 1.0, 1.0),
-                entity -> !entity.isSpectator()
+                new AABB(eyePosition, endPosition)
+                        .expandTowards(viewVector.scale(range))
+                        .inflate(-0.5),
+                entity -> !entity.isSpectator(),
+                0.0f
         );
         if (hitResult == null) {
             hitResult = level.clip(new ClipContext(

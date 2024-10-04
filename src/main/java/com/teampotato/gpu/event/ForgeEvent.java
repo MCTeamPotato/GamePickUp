@@ -1,7 +1,6 @@
 package com.teampotato.gpu.event;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.teampotato.gpu.GamePickUp;
 import com.teampotato.gpu.Util.HitResultUtil;
 import com.teampotato.gpu.client.KeyBindings;
@@ -10,7 +9,6 @@ import com.teampotato.gpu.network.c2s.ItemPickPacketC2S;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -30,11 +28,12 @@ public class ForgeEvent {
     public static void KeyPick(TickEvent.ClientTickEvent event) {
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         if (localPlayer == null) return;
-        EntityHitResult entityHitResult = HitResultUtil.hitItemEntity(localPlayer, 4);
+        EntityHitResult entityHitResult = HitResultUtil.hitItemEntity(localPlayer, 3);
         if (entityHitResult == null) return;
 
         if (entityHitResult.getEntity() instanceof ItemEntity) {
             localPlayer.displayClientMessage(Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName()), true);
+            GamePickUp.LOGGER.info("1");
             if (KeyBindings.PICK.get().consumeClick()) {
                 NetworkHandler.CHANNEL.sendToServer(ItemPickPacketC2S.pickEntity());
             }
@@ -42,7 +41,7 @@ public class ForgeEvent {
     }
 
     @SubscribeEvent
-    public static void showOverlay(RenderGuiEvent.Pre event) {
+    public static void showOverlay(RenderGuiOverlayEvent.Pre event) {
         GuiGraphics guiGraphics = event.getGuiGraphics();
         Minecraft minecraft = Minecraft.getInstance();
         Window window = minecraft.getWindow();
@@ -50,13 +49,13 @@ public class ForgeEvent {
         Font font = minecraft.font;
 
         if (level == null) return;
-        MutableComponent time = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName());
-        guiGraphics.drawString(
+        MutableComponent message = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName());
+        /*guiGraphics.drawString(
                 font,
-                time,
-                window.getX()/2-5,
-                window.getY()/2-5,
+                message,
+                window.getGuiScaledWidth() / 2 + 10,
+                window.getGuiScaledHeight() / 2 + 2,
                 0xffffff
-        );
+        );*/
     }
 }

@@ -29,7 +29,7 @@ public record ItemPickPacketC2S() {
             ServerPlayer serverPlayer = ctx.get().getSender();
             if (serverPlayer == null) return;
 
-            EntityHitResult entityHitResult = HitResultUtil.hitItemEntity(serverPlayer, 4);
+            EntityHitResult entityHitResult = HitResultUtil.hitItemEntity(serverPlayer, 3);
             if (entityHitResult.getEntity() instanceof ItemEntity itemEntity) {
                 serverPlayer.level().playSound(null, serverPlayer.blockPosition(), SoundEvents.ITEM_PICKUP, serverPlayer.getSoundSource());
                 serverPlayer.addItem(itemEntity.getItem());
