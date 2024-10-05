@@ -1,16 +1,23 @@
 package com.teampotato.gpu.mixin;
 
 import com.teampotato.gpu.client.KeyBindings;
+import com.teampotato.gpu.misc.ModTags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.common.Tags;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,12 +49,12 @@ public abstract class MinecraftMixin {
 
     @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V", ordinal = 0))
     private void useItemClick(Minecraft instance){
-        useItemOn();
+        useItemAction();
     }
 
     @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startUseItem()V", ordinal = 1))
     private void useItemKeyHold(Minecraft instance){
-        useItemOn();
+        useItemAction();
     }
 
     @Inject(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z", ordinal = 14), cancellable = true)
@@ -62,8 +69,16 @@ public abstract class MinecraftMixin {
         ci.cancel();
     }
 
+    @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getCount()I", ordinal = 0), cancellable = true)
+    private void cancelBlockPlace(CallbackInfo ci){
+        BlockHitResult blockhitresult = (BlockHitResult) this.hitResult;
+        BlockPos blockPos = blockhitresult.getBlockPos();
+        BlockState blockState = this.level.getBlockState(blockPos);
+        if (!blockState.is(ModTags.INTERACTION)) ci.cancel();
+    }
+
     @Unique
-    private void useItemOn() {
+    private void useItemAction() {
         if (!this.gameMode.isDestroying()) {
             this.rightClickDelay = 4;
             if (!this.player.isHandsBusy()) {
@@ -77,6 +92,31 @@ public abstract class MinecraftMixin {
                     ItemStack itemstack = this.player.getItemInHand(interactionhand);
                     if (!itemstack.isItemEnabled(this.level.enabledFeatures())) {
                         return;
+                    }
+
+                    if (this.hitResult != null) {
+                        if (this.hitResult.getType() == HitResult.Type.BLOCK) {
+                            BlockHitResult blockhitresult = (BlockHitResult) this.hitResult;
+                            BlockPos blockPos = blockhitresult.getBlockPos();
+                            BlockState blockState = this.level.getBlockState(blockPos);
+                            if (blockState.is(ModTags.INTERACTION)) return;
+
+                            int i = itemstack.getCount();
+                            InteractionResult interactionresult1 = this.gameMode.useItemOn(this.player, interactionhand, blockhitresult);
+                            if (interactionresult1.consumesAction()) {
+                                if (interactionresult1.shouldSwing() && inputEvent.shouldSwingHand()) {
+                                    this.player.swing(interactionhand);
+                                    if (!itemstack.isEmpty() && (itemstack.getCount() != i || this.gameMode.hasInfiniteItems())) {
+                                        this.gameRenderer.itemInHandRenderer.itemUsed(interactionhand);
+                                    }
+                                }
+                                return;
+                            }
+
+                            if (interactionresult1 == InteractionResult.FAIL) {
+                                return;
+                            }
+                        }
                     }
 
                     if (itemstack.isEmpty() && (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS))
