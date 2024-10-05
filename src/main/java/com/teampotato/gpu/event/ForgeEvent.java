@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.teampotato.gpu.GamePickUp;
 import com.teampotato.gpu.Util.HitResultUtil;
 import com.teampotato.gpu.client.KeyBindings;
+import com.teampotato.gpu.mixin.MinecraftMixin;
 import com.teampotato.gpu.network.NetworkHandler;
 import com.teampotato.gpu.network.c2s.ItemPickPacketC2S;
 import net.minecraft.ChatFormatting;

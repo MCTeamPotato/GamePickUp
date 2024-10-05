@@ -1,6 +1,7 @@
 package com.teampotato.gpu.mixin;
 
 import com.teampotato.gpu.GamePickUp;
+import com.teampotato.gpu.Util.GameModeUtil;
 import com.teampotato.gpu.client.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -61,7 +62,7 @@ public abstract class MinecraftMixin {
     }
 
     @Unique
-    private void itemAction() {
+    public void itemAction() {
         if (!this.gameMode.isDestroying()) {
             this.rightClickDelay = 4;
             if (!this.player.isHandsBusy()) {
@@ -85,7 +86,7 @@ public abstract class MinecraftMixin {
                             BlockHitResult blockhitresult = (BlockHitResult) this.hitResult;
 
                             int i = itemstack.getCount();
-                            InteractionResult interactionresult1 = this.gameMode.useItemOn(this.player, interactionhand, blockhitresult);
+                            InteractionResult interactionresult1 = GameModeUtil.useItemOn(this.player, interactionhand, blockhitresult);
                             if (interactionresult1.consumesAction()) {
                                 if (interactionresult1.shouldSwing() && inputEvent.shouldSwingHand()) {
                                     this.player.swing(interactionhand);
@@ -168,7 +169,7 @@ public abstract class MinecraftMixin {
                             case BLOCK:
                                 BlockHitResult blockhitresult = (BlockHitResult)this.hitResult;
                                 int i = itemstack.getCount();
-                                InteractionResult interactionresult1 = this.gameMode.useItemOn(this.player, interactionhand, blockhitresult);
+                                InteractionResult interactionresult1 = GameModeUtil.interactiveBlockOn(this.player, interactionhand, blockhitresult);
                                 if (interactionresult1.consumesAction()) {
                                     if (interactionresult1.shouldSwing() && inputEvent.shouldSwingHand()) {
                                         this.player.swing(interactionhand);
@@ -185,25 +186,8 @@ public abstract class MinecraftMixin {
                                 }
                         }
                     }
-
-                    if (itemstack.isEmpty() && (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS))
-                        net.minecraftforge.common.ForgeHooks.onEmptyClick(this.player, interactionhand);
-
-                    if (!itemstack.isEmpty()) {
-                        InteractionResult interactionresult2 = this.gameMode.useItem(this.player, interactionhand);
-                        if (interactionresult2.consumesAction()) {
-                            if (interactionresult2.shouldSwing()) {
-                                this.player.swing(interactionhand);
-                            }
-
-                            this.gameRenderer.itemInHandRenderer.itemUsed(interactionhand);
-                            return;
-                        }
-                    }
                 }
-
             }
         }
     }
-
 }

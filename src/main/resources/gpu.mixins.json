@@ -9,6 +9,7 @@
   ],
   "client": [
     "MinecraftMixin",
+    "accessor.MultiPlayerGameModeAccessor",
     "ScreenMixin"
   ],
   "injectors": {
