@@ -4,6 +4,7 @@ import com.teampotato.gpu.mixin.accessor.MultiPlayerGameModeAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,14 +30,23 @@ public class GameModeUtil {
             return InteractionResult.FAIL;
         } else {
             MutableObject<InteractionResult> mutableobject = new MutableObject<>();
-            gameModeAccessor.startPredictionAccessor(minecraft.level, (p_233745_) -> {
+            gameModeAccessor.startPredictionAccessor(minecraft.level, (pAction) -> {
                 mutableobject.setValue(performUseItemOn(pPlayer, pHand, pResult));
-                return new ServerboundUseItemOnPacket(pHand, pResult, p_233745_);
+                if (mutableobject.getValue() == InteractionResult.PASS || mutableobject.getValue() == InteractionResult.FAIL){
+                    return new ServerboundUseItemOnPacket(pHand,
+                            BlockHitResult.miss(
+                                    minecraft.player.getEyePosition(1.0F),
+                                    minecraft.player.getDirection(),
+                                    pResult.getBlockPos()
+                            ),
+                            pAction
+                    );
+                }
+                return new ServerboundUseItemOnPacket(pHand, pResult, pAction);
             });
             return mutableobject.getValue();
         }
     }
-
     private static InteractionResult performUseItemOn(LocalPlayer pPlayer, InteractionHand pHand, BlockHitResult pResult) {
         Minecraft minecraft = Minecraft.getInstance();
         MultiPlayerGameModeAccessor gameModeAccessor = (MultiPlayerGameModeAccessor) minecraft.gameMode;
@@ -74,6 +84,7 @@ public class GameModeUtil {
             }
         }
     }
+
     public static InteractionResult interactiveBlockOn(LocalPlayer pPlayer, InteractionHand pHand, BlockHitResult pResult) {
         Minecraft minecraft = Minecraft.getInstance();
         MultiPlayerGameModeAccessor gameModeAccessor = (MultiPlayerGameModeAccessor) minecraft.gameMode;
@@ -84,14 +95,23 @@ public class GameModeUtil {
             return InteractionResult.FAIL;
         } else {
             MutableObject<InteractionResult> mutableobject = new MutableObject<>();
-            gameModeAccessor.startPredictionAccessor(minecraft.level, (p_233745_) -> {
+            gameModeAccessor.startPredictionAccessor(minecraft.level, (pAction) -> {
                 mutableobject.setValue(performInteractiveBlockOn(pPlayer, pHand, pResult));
-                return new ServerboundUseItemOnPacket(pHand, pResult, p_233745_);
+                if (mutableobject.getValue() == InteractionResult.PASS){
+                    return new ServerboundUseItemOnPacket(pHand,
+                            BlockHitResult.miss(
+                                    minecraft.player.getEyePosition(1.0F),
+                                    minecraft.player.getDirection(),
+                                    pResult.getBlockPos()
+                            ),
+                            pAction
+                    );
+                }
+                return new ServerboundUseItemOnPacket(pHand, pResult, pAction);
             });
             return mutableobject.getValue();
         }
     }
-
     private static InteractionResult performInteractiveBlockOn(LocalPlayer pPlayer, InteractionHand pHand, BlockHitResult pResult) {
         Minecraft minecraft = Minecraft.getInstance();
         MultiPlayerGameModeAccessor gameModeAccessor = (MultiPlayerGameModeAccessor) minecraft.gameMode;
@@ -111,10 +131,10 @@ public class GameModeUtil {
             }
 
             if (event.getUseBlock() == net.minecraftforge.eventbus.api.Event.Result.ALLOW || (event.getUseBlock() != net.minecraftforge.eventbus.api.Event.Result.DENY && !flag1)) {
-                // InteractionResult interactionresult = blockstate.use(minecraft.level, pPlayer, pHand, pResult);
-                // if (interactionresult.consumesAction()) {
-                //     return interactionresult;
-                // }
+                InteractionResult interactionresult = blockstate.use(minecraft.level, pPlayer, pHand, pResult);
+                if (interactionresult.consumesAction()) {
+                    return interactionresult;
+                }
             }
 
             if (event.getUseItem() == net.minecraftforge.eventbus.api.Event.Result.DENY) {

@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -149,6 +150,7 @@ public abstract class MinecraftMixin {
                             case ENTITY:
                                 EntityHitResult entityhitresult = (EntityHitResult)this.hitResult;
                                 Entity entity = entityhitresult.getEntity();
+                                if (entity instanceof ItemEntity) return;
                                 if (!this.level.getWorldBorder().isWithinBounds(entity.blockPosition())) {
                                     return;
                                 }
