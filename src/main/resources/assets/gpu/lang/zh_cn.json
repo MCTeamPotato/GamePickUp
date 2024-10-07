@@ -1,4 +1,5 @@
 {
   "key.gpu.pick": "拾取",
-  "message.gpu.pick": "按 [%s] 拾取"
+  "message.gpu.pick": "按 [%s] 拾取",
+  "message.gpu.interaction": "按 [%s] 交互"
 }

@@ -1,19 +1,26 @@
-package com.teampotato.gpu.Util;
+package com.teampotato.gpu.util;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.*;
 
 public class HitResultUtil {
-    public static EntityHitResult hitItemEntity(Player player){
+    public static EntityHitResult hitEntity(Player player){
         HitResult hitResult = getHitResult(player.level(), player);
         if (hitResult instanceof EntityHitResult entityHitResult) {
             return entityHitResult;
+        }
+        return null;
+    }
+
+    public static BlockState hitBlock(Player player){
+        HitResult hitResult = getHitResult(player.level(), player);
+        if (hitResult instanceof BlockHitResult blockHitResult) {
+            return player.level().getBlockState(blockHitResult.getBlockPos());
         }
         return null;
     }

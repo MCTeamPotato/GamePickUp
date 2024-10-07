@@ -1,10 +1,8 @@
 package com.teampotato.gpu.network.c2s;
 
-import com.teampotato.gpu.GamePickUp;
-import com.teampotato.gpu.Util.HitResultUtil;
+import com.teampotato.gpu.util.HitResultUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.EntityHitResult;
@@ -29,7 +27,7 @@ public record ItemPickPacketC2S() {
             ServerPlayer serverPlayer = ctx.get().getSender();
             if (serverPlayer == null) return;
 
-            EntityHitResult entityHitResult = HitResultUtil.hitItemEntity(serverPlayer);
+            EntityHitResult entityHitResult = HitResultUtil.hitEntity(serverPlayer);
             if (entityHitResult.getEntity() instanceof ItemEntity itemEntity) {
                 serverPlayer.level().playSound(null, serverPlayer.blockPosition(), SoundEvents.ITEM_PICKUP, serverPlayer.getSoundSource());
                 serverPlayer.addItem(itemEntity.getItem());
