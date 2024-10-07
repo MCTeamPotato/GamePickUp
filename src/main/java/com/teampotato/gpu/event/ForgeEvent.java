@@ -51,9 +51,8 @@ public class ForgeEvent {
         if (level == null || player == null) return;
         EntityHitResult entityHitResult = HitResultUtil.hitEntity(player);
         BlockState blockHitResult = HitResultUtil.hitBlock(player);
-        if (entityHitResult == null || blockHitResult == null) return;
 
-        if (entityHitResult.getEntity() instanceof ItemEntity) {
+        if (entityHitResult != null && entityHitResult.getEntity() instanceof ItemEntity) {
             MutableComponent message = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
             guiGraphics.drawString(
                     font,
@@ -62,8 +61,8 @@ public class ForgeEvent {
                     window.getGuiScaledHeight() / 2 + 2,
                     0xffffff
             );
-        } else if (blockHitResult.is(ModTags.INTERACTION)){
-            MutableComponent message = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
+        } else if (blockHitResult != null && blockHitResult.is(ModTags.INTERACTION)){
+            MutableComponent message = Component.translatable("message.gpu.interaction", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
             guiGraphics.drawString(
                     font,
                     message,
