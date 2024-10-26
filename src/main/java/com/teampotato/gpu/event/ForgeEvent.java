@@ -12,22 +12,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = GamePickUp.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ForgeEvent {
     @SubscribeEvent
-    public static void KeyPick(TickEvent.ClientTickEvent event) {
+    public static void KeyPick(InputEvent event) {
         LocalPlayer localPlayer = Minecraft.getInstance().player;
         if (localPlayer == null) return;
         EntityHitResult entityHitResult = HitResultUtil.hitEntity(localPlayer);
@@ -52,24 +54,31 @@ public class ForgeEvent {
         EntityHitResult entityHitResult = HitResultUtil.hitEntity(player);
         BlockState blockHitResult = HitResultUtil.hitBlock(player);
 
+        MutableComponent message = Component.empty();
         if (entityHitResult != null && entityHitResult.getEntity() instanceof ItemEntity) {
-            MutableComponent message = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
-            guiGraphics.drawString(
-                    font,
-                    message,
-                    window.getGuiScaledWidth() / 2 + 10,
-                    window.getGuiScaledHeight() / 2 + 2,
-                    0xffffff
-            );
+            message = Component.translatable("message.gpu.pick", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
         } else if (blockHitResult != null && blockHitResult.is(ModTags.INTERACTION)){
-            MutableComponent message = Component.translatable("message.gpu.interaction", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
-            guiGraphics.drawString(
-                    font,
-                    message,
-                    window.getGuiScaledWidth() / 2 + 10,
-                    window.getGuiScaledHeight() / 2 + 2,
-                    0xffffff
-            );
+            message = Component.translatable("message.gpu.interaction", KeyBindings.PICK.get().getKey().getDisplayName()).withStyle(ChatFormatting.YELLOW);
+        }
+        guiGraphics.drawString(
+                font,
+                message,
+                window.getGuiScaledWidth() / 2 + 10,
+                window.getGuiScaledHeight() / 2 + 2,
+                0xffffff
+        );
+    }
+
+    @SubscribeEvent
+    public static void cancelRight(InputEvent.InteractionKeyMappingTriggered event){
+        if (event.isUseItem()){
+            BlockHitResult blockhitresult = (BlockHitResult) Minecraft.getInstance().hitResult;
+            BlockPos blockPos = blockhitresult.getBlockPos();
+            BlockState blockState = Minecraft.getInstance().level.getBlockState(blockPos);
+            if (blockState.is(ModTags.INTERACTION)) {
+                //event.setCanceled(true);
+                //event.setSwingHand(false);
+            }
         }
     }
 }

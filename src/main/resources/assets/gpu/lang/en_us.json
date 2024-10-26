@@ -1,5 +1,5 @@
 {
-  "key.gpu.pick": "Pick",
+  "key.gpu.pick": "Pick/Interaction",
   "message.gpu.pick": "Press [%s] to pick",
   "message.gpu.interaction": "Press [%s] to interaction"
 }
